@@ -13,12 +13,8 @@ public class Thing extends BaseThing implements Serializable, Area {
 		setVar2(var2);
 	}
 
-	public String getVar1(){
-		return var1;
-	}
-
-	public int getVar2(){
-		return var2;
+	public static void main(String args[]) {
+		
 	}
 
 	public void setVar1(String var1){
@@ -27,5 +23,13 @@ public class Thing extends BaseThing implements Serializable, Area {
 
 	public void setVar2(int var2){
 		this.var2 = var2;
+	}
+
+	public String getVar1(){
+		return var1;
+	}
+
+	public int getVar2(){
+		return var2;
 	}
 }

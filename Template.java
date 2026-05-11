@@ -8,6 +8,7 @@ public class Template {
   private static ArrayList<String> implementations = new ArrayList<>();
   private static String extendsName = "";
   private static boolean abstractClass = false;
+  private static boolean includeMain = false;
 
   public static void main(String args[]) {
     // class name
@@ -22,6 +23,8 @@ public class Template {
     // -m run
     // abstract or not
     // -a true
+    // include main (test)
+    // -t true
     String makeRunCmd = "";
     // default is classname
     char processType = 'c';
@@ -79,8 +82,18 @@ public class Template {
         break;
         case 'm':
         makeRunCmd = args[i];
+        if (abstractClass) {
+          System.out.println("Error cannot be abstract and have a main function, note that having a make section creates a main function.");
+          System.exit(-1);
+        }
+
+        includeMain = true;
         break;
         case 'a':
+        if (includeMain) {
+          System.out.println("Error cannot be abstract and have a main function.");
+          System.exit(-1);
+        }
         if (args[i].equals("true")) {
           abstractClass = true;
         } else {
@@ -109,9 +122,10 @@ public class Template {
       writeClassHeader(file, classUpper);
       writeVars(file);
       writeConstructor(file, classUpper);
+      writeMain(file);
       writeAbstractMethods(file);
-      writeAccessors(file);
       writeMutators(file);
+      writeAccessors(file);
 
       file.write("}");
       file.close();
@@ -285,6 +299,14 @@ public class Template {
     file.write("\t}\n");
   }
 
+  public static void writeMain(FileWriter file) throws IOException {
+    if (includeMain) {
+      file.write("\n\tpublic static void main(String args[]) {\n");
+      file.write("\t\t\n");
+      file.write("\t}\n");
+    }
+  }
+
   private static String getDefaultFromTypePrimative(String type) {
     if (type.equals("String")) {
       return "\"\"";
@@ -307,6 +329,10 @@ public class Template {
   }
 
   private static void writeExtendedClassMethods(FileWriter file) {
+    try {
+      String path = getLibPath(extendsName);
+      // this shouldnt happen since it exits earlier if a class isnt found
+    } catch (ClassNotFoundException e) {}
   }
 
   // check interfaces and extends class for abstract methods that need to be implemented in here
@@ -314,6 +340,7 @@ public class Template {
     // if its not an abstract class it should have implementations for all abstract methods
     if (!abstractClass) {
       System.out.println("TODO METHODS");
+      writeInterfaceMethods(file);
     }
   }
 
