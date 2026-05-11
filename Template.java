@@ -79,10 +79,15 @@ public class Template {
 
       System.out.println("Process param: `" + args[i] + "`");
     }
+
+    System.out.println(className);
+    System.out.println(variables);
+    System.out.println(implementations);
+    System.out.println(extensions);
+    System.out.println(makeRunCmd);
   }
 
   public static void createJavaOut() {
-
   }
 
   public static void updateMake(String cmdName) {

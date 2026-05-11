@@ -3,7 +3,8 @@ import java.io.*;
 public class Test {
   public static void main(String args[]) {
     Runtime runtime = Runtime.getRuntime();
-    String cmd[] = new String[]{"java", "Template", "-c", "Thing", "-v", "String", "var1", "int", "var2", "-i"};
+    String cmd[] = new String[]{"java", "Template", "-c", "Thing", "-v", "String",
+      "var1", "int", "var2", "-i", "Serializable", "-e", "Object", "Object1", "-m", "run"};
 
     try {
       Process process = runtime.exec(cmd);
