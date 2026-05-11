@@ -4,7 +4,7 @@ public class Test {
   public static void main(String args[]) {
     Runtime runtime = Runtime.getRuntime();
     String cmd[] = new String[]{"java", "Template", "-c", "Thing", "-v", "String",
-      "var1", "int", "var2", "-i", "Serializable", "-e", "Object", "Object1", "-m", "run"};
+      "var1", "int", "var2", "-i", "Serializable", "Area", "-e", "Object", "Object1", "-m", "run", "-a", "true"};
 
     try {
       Process process = runtime.exec(cmd);

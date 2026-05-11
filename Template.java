@@ -7,6 +7,7 @@ public class Template {
   private static ArrayList<String> variables = new ArrayList<>();
   private static ArrayList<String> implementations = new ArrayList<>();
   private static String extendsName = "";
+  private static boolean abstractClass = false;
 
   public static void main(String args[]) {
     // class name
@@ -19,6 +20,8 @@ public class Template {
     // -v String var1 int var2 
     // make file with run command run
     // -m run
+    // abstract or not
+    // -a true
     String makeRunCmd = "";
     // default is classname
     char processType = 'c';
@@ -46,6 +49,7 @@ public class Template {
           case 'i':
           case 'e':
           case 'm':
+          case 'a':
           processType = a;
           System.out.println("Process: `" + a + "`");
           evaluatedParam = false;
@@ -76,6 +80,13 @@ public class Template {
         case 'm':
         makeRunCmd = args[i];
         break;
+        case 'a':
+        if (args[i].equals("true")) {
+          abstractClass = true;
+        } else {
+          abstractClass = false;
+        }
+        break;
       }
 
       System.out.println("Process param: `" + args[i] + "`");
@@ -98,6 +109,7 @@ public class Template {
       writeClassHeader(file, classUpper);
       writeVars(file);
       writeConstructor(file, classUpper);
+      writeAbstractMethods(file);
       writeAccessors(file);
       writeMutators(file);
 
@@ -113,7 +125,9 @@ public class Template {
   private static String libs[] = new String[]{
     "java.io.",
     "java.util.",
-    "java.lang."
+    "java.lang.",
+    // current dir
+    ""
   };
 
   // this _should_ work for classes and interfaces
@@ -151,9 +165,13 @@ public class Template {
       for (int i = 0; i<implementations.size(); i++) {
         try {
           String path = getLibPath(implementations.get(i));
-          file.write("include " + path + ";\n");
+          // no import path needed if its in local dir
+          if (!path.equals(implementations.get(i))) {
+            file.write("import " + path + ";\n");
+          }
+
         } catch (ClassNotFoundException e) {
-          System.out.println("Could not find `" + className + "` library import, likely spelling mistake, strange library or missing .class file.");
+          System.out.println("Could not find `" + className + "` library import, likely spelling mistake, external library or missing .class file.");
         }
       }
 
@@ -161,7 +179,13 @@ public class Template {
     }
 
 
-    file.write("public class " + className);
+    file.write("public");
+
+    if (abstractClass) {
+      file.write(" abstract");
+    }
+
+    file.write(" class " + className);
 
     if (classExtends()) {
       file.write(" extends " + extendsName);
@@ -171,6 +195,9 @@ public class Template {
         file.write(" implements ");
       for (int i = 0; i<implementations.size(); i++) {
         file.write(implementations.get(i));
+        if (!(i>implementations.size() - 2)) {
+          file.write(", ");
+        }
       }
     }
 
@@ -252,6 +279,20 @@ public class Template {
 
     // if its not any of those im just assuming its a class
     return "new " + type + "()";
+  }
+
+  private static void writeInterfaceMethods(FileWriter file) {
+  }
+
+  private static void writeExtendedClassMethods(FileWriter file) {
+  }
+
+  // check interfaces and extends class for abstract methods that need to be implemented in here
+  private static void writeAbstractMethods(FileWriter file) {
+    // if its not an abstract class it should have implementations for all abstract methods
+    if (!abstractClass) {
+      System.out.println("TODO METHODS");
+    }
   }
 
   private static String getAccessorFunction(String var) {

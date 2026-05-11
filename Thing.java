@@ -1,6 +1,6 @@
-include java.io.Serializable;
+import java.io.Serializable;
 
-public class Thing extends Object1 implements Serializable {
+public abstract class Thing extends Object1 implements Serializable, Area {
 	private String var1;
 	private int var2;
 
