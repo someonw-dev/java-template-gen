@@ -1,4 +1,5 @@
-import java.util.ArrayList;
+import java.util.*;
+import java.io.*;
 
 public class Template {
   // i do not particulary want to pass these as parameters so whatever
@@ -84,12 +85,111 @@ public class Template {
     System.out.println(variables);
     System.out.println(implementations);
     System.out.println(extensions);
-    System.out.println(makeRunCmd);
+
+    createJavaOut();
+    updateMake(makeRunCmd);
   }
 
-  public static void createJavaOut() {
+  private static void createJavaOut() {
+    String classUpper = className.substring(0, 1).toUpperCase() + className.substring(1);
+    try {
+      FileWriter file = new FileWriter(classUpper + ".java");
+      file.write("public class " + classUpper + " {\n");
+
+      writeConstructor(file, classUpper);
+
+
+
+      file.write("}");
+      file.close();
+    } catch (IOException e) {
+      System.out.println("Error: " + e);
+      System.exit(-1);
+    }
   }
 
-  public static void updateMake(String cmdName) {
+  // default + one with vars
+  private static void writeConstructor(FileWriter file, String className) throws IOException {
+    writeDefCons(file, className);
+    file.write("\n");
+    writeVarCons(file, className);
+  }
+
+  private static void writeDefCons(FileWriter file, String className) throws IOException {
+    file.write("\tpublic " + className + "() {\n");
+    file.write("\t\tthis(");
+
+    // +2 since every second entry is a name and not a type
+    for (int i = 0; i<variables.size(); i += 2) {
+      file.write(getDefaultFromTypePrimative(variables.get(i)));
+      // -3 to account for 0 indexing, the fact that the last one should be a variable name and other thing im too lazy
+      if (!(i>variables.size() - 3)) {
+        file.write(", ");
+      }
+    }
+    file.write(");\n");
+
+    file.write("\t}\n");
+  }
+
+  private static void writeVarCons(FileWriter file, String className) throws IOException {
+    // constructor variables
+    file.write("\tpublic " + className + "(");
+    for (int i = 0; i<variables.size(); i += 2) {
+      file.write(variables.get(i));
+      file.write(" ");
+      file.write(variables.get(i + 1));
+      // -3 to account for 0 indexing, the fact that the last one should be a variable name and other thing im too lazy
+      if (!(i>variables.size() - 3)) {
+        file.write(", ");
+      }
+    }
+    file.write(") {\n");
+
+    file.write("\t\tthis(");
+
+    // +2 since every second entry is a name and not a type
+    for (int i = 0; i<variables.size(); i += 2) {
+      file.write(getDefaultFromTypePrimative(variables.get(i)));
+      // -3 to account for 0 indexing, the fact that the last one should be a variable name and other thing im too lazy
+      if (!(i>variables.size() - 3)) {
+        file.write(", ");
+      }
+    }
+    file.write(");\n");
+
+    file.write("\t}\n");
+  }
+
+  private static String getDefaultFromTypePrimative(String type) {
+    if (type.equals("String")) {
+      return "\"\"";
+    }
+
+    if (type.equals("int") | type.equals("double") | type.equals("float")) {
+      return "0";
+    }
+
+    // if its not any of those im just assuming its a class
+    return "new " + type + "()";
+  }
+
+  private static void writeVar(FileWriter file, String type, String var) throws IOException {
+  }
+
+  private static void getAccessor(FileWriter file, String type, String var) throws IOException {
+  }
+
+  private static void writeAccessor(FileWriter file, String type, String var) throws IOException {
+  }
+
+  private static void getMutator(FileWriter file, String type, String var) throws IOException {
+  }
+
+  private static void writeMutator(FileWriter file, String type, String var) throws IOException {
+  }
+
+  private static void updateMake(String cmdName) {
+    System.out.println(cmdName);
   }
 }
