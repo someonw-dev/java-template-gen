@@ -1,5 +1,6 @@
 import java.util.*;
 import java.io.*;
+import java.lang.reflect.*;
 
 public class Template {
   // i do not particulary want to pass these as parameters so whatever
@@ -91,7 +92,7 @@ public class Template {
         break;
         case 'a':
         if (includeMain) {
-          System.out.println("Error cannot be abstract and have a main function.");
+          System.out.println("Error cannot be abstract and have a main function, note that having a make section creates a main function.");
           System.exit(-1);
         }
         if (args[i].equals("true")) {
@@ -151,6 +152,18 @@ public class Template {
       try {
         Class c1 = Class.forName(libs[i] + className);
         return libs[i] + className;
+      } catch (ClassNotFoundException e) {}
+    }
+
+    // if it doesnt find any
+    throw new ClassNotFoundException();
+  }
+
+  private static Class getClass(String className) throws ClassNotFoundException {
+    for (int i = 0; i<libs.length; i++) {
+      try {
+        Class c1 = Class.forName(libs[i] + className);
+        return c1;
       } catch (ClassNotFoundException e) {}
     }
 
@@ -321,26 +334,84 @@ public class Template {
       return "'n'";
     }
 
+    if (type.equals("void")) {
+      return "";
+    }
+
     // if its not any of those im just assuming its a class
     return "new " + type + "()";
   }
 
-  private static void writeInterfaceMethods(FileWriter file) {
+  private static void writeInterfaceMethods(FileWriter file) throws IOException {
+    for (int i = 0; i<implementations.size(); i++) {
+      writeClassAbstractMethods(file, implementations.get(i));
+    }
   }
 
-  private static void writeExtendedClassMethods(FileWriter file) {
+  private static void writeExtendedClassMethods(FileWriter file) throws IOException {
+    writeClassAbstractMethods(file, extendsName);
+  }
+
+  public static void writeClassAbstractMethods(FileWriter file, String className) throws IOException {
     try {
-      String path = getLibPath(extendsName);
+      Class<?> cls = getClass(className);
+      // kinda cool
+      // https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html#getDeclaredMethods--
+      // this doesnt return the parents methods so i should probably add some extra logic to this
+      Method[] methods = cls.getDeclaredMethods();
+
+      for (int i = 0; i < methods.length; i++) {
+        // if a method is abstract write it as an implementation
+        if (Modifier.isAbstract(methods[i].getModifiers())) {
+          Method m = methods[i];
+          // stuff before the return type
+          String preReturn = "\n\t";
+
+          if (Modifier.isPrivate(m.getModifiers())) {
+            preReturn += "private ";
+          } else {
+            preReturn += "public ";
+          }
+
+          if (Modifier.isStatic(m.getModifiers())) {
+            preReturn += "static ";
+          }
+
+          // some of these give extra info which you dont need
+          String returnType = stripBeforeLastDot(m.getReturnType().toString());
+          String name = m.getName();
+          Parameter params[] = m.getParameters();
+          String paramOut = "";
+
+          for (int j = 0; j<params.length ; j++) {
+            paramOut += stripBeforeLastDot(params[j].getType().toString()) + " ";
+            paramOut += params[j].getName();
+            if (j<params.length - 1) {
+              paramOut += ", ";
+            }
+          }
+
+          System.out.println(preReturn + returnType + " "+ name + "(" + paramOut + ")");
+          file.write(preReturn + returnType + " "+ name + "(" + paramOut + ")" + "{\n");
+          file.write("\t\treturn " + getDefaultFromTypePrimative(returnType) + ";");
+          file.write("\n\t}\n");
+        }
+      }
+
       // this shouldnt happen since it exits earlier if a class isnt found
     } catch (ClassNotFoundException e) {}
   }
 
+  public static String stripBeforeLastDot(String str) {
+    return str.substring(str.lastIndexOf('.') + 1);
+  }
+
   // check interfaces and extends class for abstract methods that need to be implemented in here
-  private static void writeAbstractMethods(FileWriter file) {
+  private static void writeAbstractMethods(FileWriter file) throws IOException {
     // if its not an abstract class it should have implementations for all abstract methods
     if (!abstractClass) {
-      System.out.println("TODO METHODS");
       writeInterfaceMethods(file);
+      writeExtendedClassMethods(file);
     }
   }
 
@@ -383,6 +454,5 @@ public class Template {
   }
 
   private static void updateMake(String cmdName) {
-    System.out.println(cmdName);
   }
 }

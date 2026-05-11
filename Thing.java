@@ -17,6 +17,14 @@ public class Thing extends BaseThing implements Serializable, Area {
 		
 	}
 
+	public void Something(){
+		return ;
+	}
+
+	public String returnSomething(String var1, int var2){
+		return "";
+	}
+
 	public void setVar1(String var1){
 		this.var1 = var1;
 	}

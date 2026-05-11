@@ -1,5 +1,5 @@
 all:
-	javac *.java
+	javac -parameters *.java
 
 run: all
 	java Test
