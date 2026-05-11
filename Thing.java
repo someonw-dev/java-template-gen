@@ -1,6 +1,6 @@
 import java.io.Serializable;
 
-public abstract class Thing extends Object1 implements Serializable, Area {
+public class Thing extends BaseThing implements Serializable, Area {
 	private String var1;
 	private int var2;
 

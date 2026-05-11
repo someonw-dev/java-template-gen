@@ -123,11 +123,11 @@ public class Template {
 
 
   private static String libs[] = new String[]{
+    // current dir
+    "",
     "java.io.",
     "java.util.",
-    "java.lang.",
-    // current dir
-    ""
+    "java.lang."
   };
 
   // this _should_ work for classes and interfaces
@@ -161,6 +161,9 @@ public class Template {
   }
 
   private static void writeClassHeader(FileWriter file, String className) throws IOException {
+    // only newline if imported something
+    boolean imported = false;
+
     if (classImplements()) {
       for (int i = 0; i<implementations.size(); i++) {
         try {
@@ -170,14 +173,33 @@ public class Template {
             file.write("import " + path + ";\n");
           }
 
+          imported = true;
         } catch (ClassNotFoundException e) {
-          System.out.println("Could not find `" + className + "` library import, likely spelling mistake, external library or missing .class file.");
+          System.out.println("Could not find `" + implementations.get(i) + "` import path, likely spelling mistake, external library or missing .class file.");
+          System.exit(-1);
         }
       }
-
-      file.write("\n");
     }
 
+    if (classExtends()) {
+      try {
+        String path = getLibPath(extendsName);
+        // no import path needed if its in local dir
+        if (!path.equals(extendsName)) {
+          file.write("import " + path + ";\n");
+          imported = true;
+        }
+
+      } catch (ClassNotFoundException e) {
+        System.out.println("Could not find `" + extendsName + "` import path, likely spelling mistake, external library or missing .class file.");
+        System.exit(-1);
+      }
+    }
+
+    // only newline if imported something
+    if (imported) {
+      file.write("\n");
+    }
 
     file.write("public");
 
