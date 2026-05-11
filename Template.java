@@ -1,6 +1,12 @@
 import java.util.ArrayList;
 
 public class Template {
+  // i do not particulary want to pass these as parameters so whatever
+  private static String className = "";
+  private static ArrayList<String> variables = new ArrayList<>();
+  private static ArrayList<String> implementations = new ArrayList<>();
+  private static ArrayList<String> extensions = new ArrayList<>();
+
   public static void main(String args[]) {
     // class name
     // -c className
@@ -12,10 +18,6 @@ public class Template {
     // -v String var1 int var2 
     // make file with run command run
     // -m run
-    String className = "";
-    ArrayList<String> variables = new ArrayList<>();
-    ArrayList<String> implementations = new ArrayList<>();
-    ArrayList<String> extensions = new ArrayList<>();
     String makeRunCmd = "";
     // default is classname
     char processType = 'c';
@@ -26,7 +28,12 @@ public class Template {
       // if new process Type
       if (c == '-') {
         if (!evaluatedParam) {
-          System.out.println("No evaluated paramaters between processes `" + args[i-1] + "` and `" + args[i] + "`.");
+          System.out.println("No evaluation paramaters between processes `" + args[i-1] + "` and `" + args[i] + "`.");
+          System.exit(-1);
+        }
+
+        if (i == args.length -1) {
+          System.out.println("No evaluation paramaters for last process: `" + args[i] + "`.");
           System.exit(-1);
         }
         // arg
@@ -34,9 +41,9 @@ public class Template {
 
         switch (a) {
           case 'c':
+          case 'v':
           case 'i':
           case 'e':
-          case 'v':
           case 'm':
           processType = a;
           System.out.println("Process: `" + a + "`");
@@ -56,19 +63,26 @@ public class Template {
         case 'c':
         className = args[i];
         break;
+        case 'v':
+        variables.add(args[i]);
+        break;
         case 'i':
+        implementations.add(args[i]);
         break;
         case 'e':
-        break;
-        case 'v':
+        extensions.add(args[i]);
         break;
         case 'm':
+        makeRunCmd = args[i];
         break;
       }
 
       System.out.println("Process param: `" + args[i] + "`");
-
     }
+  }
+
+  public static void createJavaOut() {
+
   }
 
   public static void updateMake(String cmdName) {
