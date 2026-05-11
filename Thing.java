@@ -1,3 +1,5 @@
+include java.io.Serializable;
+
 public class Thing extends Object1 implements Serializable {
 	private String var1;
 	private int var2;

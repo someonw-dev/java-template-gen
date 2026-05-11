@@ -109,14 +109,65 @@ public class Template {
     }
   }
 
+
+  private static String libs[] = new String[]{
+    "java.io.",
+    "java.util.",
+    "java.lang."
+  };
+
+  // this _should_ work for classes and interfaces
+  private static String getLibPath(String className) throws ClassNotFoundException {
+    for (int i = 0; i<libs.length; i++) {
+      // see if its in one of the lib paths
+      try {
+        Class c1 = Class.forName(libs[i] + className);
+        return libs[i] + className;
+      } catch (ClassNotFoundException e) {}
+    }
+
+    // if it doesnt find any
+    throw new ClassNotFoundException();
+  }
+
+  private static boolean classExtends() {
+    if (!extendsName.trim().isEmpty()) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private static boolean classImplements() {
+    if (implementations.size() >= 1) {
+      return true;
+    }
+
+    return false;
+  }
+
   private static void writeClassHeader(FileWriter file, String className) throws IOException {
+    if (classImplements()) {
+      for (int i = 0; i<implementations.size(); i++) {
+        try {
+          String path = getLibPath(implementations.get(i));
+          file.write("include " + path + ";\n");
+        } catch (ClassNotFoundException e) {
+          System.out.println("Could not find `" + className + "` library import, likely spelling mistake, strange library or missing .class file.");
+        }
+      }
+
+      file.write("\n");
+    }
+
+
     file.write("public class " + className);
 
-    if (!extendsName.trim().isEmpty()) {
+    if (classExtends()) {
       file.write(" extends " + extendsName);
     }
 
-    if (implementations.size() >= 1) {
+    if (classImplements()) {
         file.write(" implements ");
       for (int i = 0; i<implementations.size(); i++) {
         file.write(implementations.get(i));
