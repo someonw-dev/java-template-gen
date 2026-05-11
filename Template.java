@@ -14,7 +14,7 @@ public class Template {
     // implements
     // -i Interface Interface2
     // extends
-    // -e Object Object2
+    // -e Object
     // variables with getters and setters
     // -v String var1 int var2 
     // make file with run command run
@@ -94,8 +94,8 @@ public class Template {
     String classUpper = capitalize(className);
     try {
       FileWriter file = new FileWriter(classUpper + ".java");
-      file.write("public class " + classUpper + " {\n");
 
+      writeClassHeader(file, classUpper);
       writeVars(file);
       writeConstructor(file, classUpper);
       writeAccessors(file);
@@ -107,6 +107,23 @@ public class Template {
       System.out.println("Error: " + e);
       System.exit(-1);
     }
+  }
+
+  private static void writeClassHeader(FileWriter file, String className) throws IOException {
+    file.write("public class " + className);
+
+    if (!extendsName.trim().isEmpty()) {
+      file.write(" extends " + extendsName);
+    }
+
+    if (implementations.size() >= 1) {
+        file.write(" implements ");
+      for (int i = 0; i<implementations.size(); i++) {
+        file.write(implementations.get(i));
+      }
+    }
+
+    file.write(" {\n");
   }
 
   private static void writeVars(FileWriter file) throws IOException {
