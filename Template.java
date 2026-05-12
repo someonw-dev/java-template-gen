@@ -53,7 +53,6 @@ public class Template {
           case 'm':
           case 'a':
           processType = a;
-          System.out.println("Process: `" + a + "`");
           evaluatedParam = false;
           break;
           default:
@@ -99,14 +98,12 @@ public class Template {
         }
         break;
       }
-
-      System.out.println("Process param: `" + args[i] + "`");
     }
 
-    System.out.println(className);
-    System.out.println(variables);
-    System.out.println(implementations);
-    System.out.println(extendsName);
+    System.out.println("Class name: " + className);
+    System.out.println("Variables: " + variables);
+    System.out.println("Implementations: " + implementations);
+    System.out.println("Extensions: " + extendsName);
 
     createJavaOut();
     updateMake(makeRunCmd);
@@ -117,14 +114,24 @@ public class Template {
     try {
       FileWriter file = new FileWriter(classUpper + ".java");
 
+      // just because it looks cooler if you print lots of things :P
+      System.out.println("Writing imports...");
       writeImports(file);
+      System.out.println("Writing class header...");
       writeClassHeader(file, classUpper);
+      System.out.println("Writing variable definitions...");
       writeVars(file);
+      System.out.println("Writing constructor...");
       writeConstructor(file, classUpper);
+      System.out.println("Writing main...");
       writeMain(file);
+      System.out.println("Writing abstract methods...");
       writeAbstractMethods(file);
+      System.out.println("Writing mutators...");
       writeMutators(file);
+      System.out.println("Writing accessors...");
       writeAccessors(file);
+      System.out.println("Writing toString...");
       writeToString(file);
 
       file.write("}");
@@ -505,7 +512,7 @@ public class Template {
             }
           }
 
-          file.write(preReturn + returnType + " "+ name + "(" + paramOut + ")" + "{\n");
+          file.write(preReturn + returnType + " "+ name + "(" + paramOut + ")" + " {\n");
           file.write("\t\treturn " + getDefaultFromTypePrimative(returnType) + ";");
           file.write("\n\t}\n");
         }
@@ -533,7 +540,7 @@ public class Template {
   }
 
   private static void writeAccessor(FileWriter file, String type, String var) throws IOException {
-    file.write("\tpublic " + type + " " + getAccessorFunction(var) + "{\n");
+    file.write("\tpublic " + type + " " + getAccessorFunction(var) + " {\n");
     file.write("\t\treturn " + var + ";\n");
     file.write("\t}\n");
   }
@@ -561,7 +568,7 @@ public class Template {
   }
 
   private static void writeMutator(FileWriter file, String type, String var) throws IOException {
-    file.write("\tpublic void " + getMutatorFunctionWithParam(var, type + " " + var) + "{\n");
+    file.write("\tpublic void " + getMutatorFunctionWithParam(var, type + " " + var) + " {\n");
     file.write("\t\tthis." + var + " = " + var + ";\n");
     file.write("\t}\n");
   }
@@ -613,5 +620,41 @@ public class Template {
   }
 
   private static void updateMake(String cmdName) {
+    // check if makefile exists
+    final String name = "makefile1";
+    File checkFile = new File(name);
+    FileWriter file;
+    boolean exists = true;
+
+
+    if (!(checkFile.exists() && !checkFile.isDirectory())) {
+      System.out.println("Makefile doesnt exist generating new makefile...");
+
+      exists = false;
+
+    }
+
+    try {
+      file = new FileWriter(name);
+
+    if (!exists) {
+      try {
+        file.write("all:\n");
+        file.write("\tjavac -parameters *.java\n");
+
+      } catch (IOException e ) {
+        System.out.println("Error writing to makefile.");
+        System.exit(-1);
+      }
+    }
+  
+      file.write("\n" + cmdName + ": all\n");
+      file.write("\tjava " + className);
+
+      file.close();
+    } catch (IOException e ) {
+      System.out.println("Error writing to makefile.");
+      System.exit(-1);
+    }
   }
 }
