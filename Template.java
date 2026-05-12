@@ -107,6 +107,7 @@ public class Template {
 
     createJavaOut();
     updateMake(makeRunCmd);
+    compile();
   }
 
   private static void createJavaOut() {
@@ -631,11 +632,11 @@ public class Template {
       System.out.println("Makefile doesnt exist generating new makefile...");
 
       exists = false;
-
     }
 
     try {
-      file = new FileWriter(name);
+      // true means append
+      file = new FileWriter(name, true);
 
     if (!exists) {
       try {
@@ -647,7 +648,7 @@ public class Template {
         System.exit(-1);
       }
     }
-  
+
       file.write("\n" + cmdName + ": all\n");
       file.write("\tjava " + className);
 
@@ -656,5 +657,25 @@ public class Template {
       System.out.println("Error writing to makefile.");
       System.exit(-1);
     }
+  }
+
+  private static void compile() {
+    System.out.println("Compiling " + className + ".java...");
+    Runtime runtime = Runtime.getRuntime();
+    String cmd[] = new String[]{"javac", className + ".java"};
+
+    try {
+      Process process = runtime.exec(cmd);
+      String out = convertStreamToString(process.getInputStream());
+      System.out.println(out);
+    } catch (IOException e) {
+      System.err.println("Error: " + e);
+      System.exit(-1);
+    }
+  }
+
+  static String convertStreamToString(java.io.InputStream is) {
+    java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+    return s.hasNext() ? s.next() : "";
   }
 }

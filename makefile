@@ -1,5 +1,8 @@
 all:
-	javac -parameters *.java
+	javac *.java
 
 run: all
 	java Test
+
+runthing: all
+	java Thing
