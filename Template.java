@@ -638,16 +638,10 @@ public class Template {
       // true means append
       file = new FileWriter(name, true);
 
-    if (!exists) {
-      try {
+      if (!exists) {
         file.write("all:\n");
         file.write("\tjavac -parameters *.java\n");
-
-      } catch (IOException e ) {
-        System.out.println("Error writing to makefile.");
-        System.exit(-1);
       }
-    }
 
       file.write("\n" + cmdName + ": all\n");
       file.write("\tjava " + className);
