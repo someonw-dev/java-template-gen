@@ -12,6 +12,7 @@ public class Thing extends BaseThing implements Serializable, Area {
 	}
 
 	public Thing(String var1, int var2) {
+		super(0, "", 0);
 		setVar1(var1);
 		setVar2(var2);
 	}

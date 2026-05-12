@@ -161,8 +161,8 @@ public class Template {
   private static Class getClass(String className) throws ClassNotFoundException {
     for (int i = 0; i<libs.length; i++) {
       try {
-        Class c1 = Class.forName(libs[i] + className);
-        return c1;
+        Class c = Class.forName(libs[i] + className);
+        return c;
       } catch (ClassNotFoundException e) {}
     }
 
@@ -347,8 +347,6 @@ public class Template {
 
   // constructor with variables
   private static void writeVarCons(FileWriter file, String className) throws IOException {
-    // TODO: if you extend a class
-    // super(class type1, class type2);
 
     // constructor variables
     file.write("\tpublic " + className + "(");
@@ -368,6 +366,38 @@ public class Template {
       }
     }
     file.write(") {\n");
+
+
+    // check if you need to super
+    try {
+      Class<?> cls = getClass(extendsName);
+      Constructor<?> cons[] = cls.getConstructors();
+
+      // returns first constructor with some parameters
+      for (int i = 0; i<cons.length; i++) {
+        Parameter params[] = cons[i].getParameters();
+        if (params.length > 0) {
+          file.write("\t\tsuper(");
+          prev = false;
+
+          // just writing the vars with default types
+          for (int j = 0; j<params.length; j++) {
+            if (prev) {
+              file.write(", ");
+            }
+
+            // holy what a line
+            file.write(getDefaultFromTypePrimative(stripBeforeLastDot(params[j].getType().toString())));
+
+            prev = true;
+          }
+          file.write(");\n");
+        }
+      }
+
+    } catch (ClassNotFoundException e) {
+      System.out.println("Extends class definition not found, cannot write default super.");
+    }
 
     // +2 since every second entry is a name and not a type
     for (int i = 0; i<variables.size(); i += 3) {
@@ -396,6 +426,8 @@ public class Template {
     return false;
   }
 
+  // probably shouldnt have named this primative
+  // oh well
   private static String getDefaultFromTypePrimative(String type) {
     if (type.equals("String")) {
       return "\"\"";
@@ -419,6 +451,8 @@ public class Template {
     }
 
     // if its not any of those im just assuming its a class
+    // i _should_ get the class type go through its constructors to get a valid one but i do not care
+    // this is a template script not a do everything script
     return "new " + type + "()";
   }
 
