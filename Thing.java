@@ -1,47 +1,43 @@
 import java.io.Serializable;
 
-public class Thing extends BaseThing implements Serializable, Area {
-  private String var1;
-  private int var2;
+public class Thing extends BaseThing implements Area, Serializable {
+	private String name;
+	private int count;
 
-  public Thing() {
-    this("", 0);
-  }
+	public Thing() {
+		this("", 0);
+	}
 
-  public Thing(String var1, int var2) {
-    setVar1(var1);
-    setVar2(var2);
-  }
+	public Thing(String name, int count) {
+		setName(name);
+		setCount(count);
+	}
 
-  public static void main(String args[]) {
+	public void Something(){
+		return ;
+	}
 
-  }
+	public String returnSomething(String var1, int var2){
+		return "";
+	}
 
-  public void Something(){
-    return ;
-  }
+	public void setName(String name){
+		this.name = name;
+	}
 
-  public String returnSomething(String var1, int var2){
-    return "";
-  }
+	public void setCount(int count){
+		this.count = count;
+	}
 
-  public void setVar1(String var1){
-    this.var1 = var1;
-  }
+	public String getName(){
+		return name;
+	}
 
-  public void setVar2(int var2){
-    this.var2 = var2;
-  }
+	public int getCount(){
+		return count;
+	}
 
-  public String getVar1(){
-    return var1;
-  }
-
-  public int getVar2(){
-    return var2;
-  }
-
-  public String toString() {
-    return "\nvar1: " + getVar1() + "\nvar2: " + getVar2();
-  }
+	public String toString() {
+		return "\nname: " + getName() + "\ncount: " + getCount();
+	}
 }

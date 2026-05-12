@@ -24,8 +24,6 @@ public class Template {
     // -m run
     // abstract or not
     // -a true
-    // include main (test)
-    // -t true
     String makeRunCmd = "";
     // default is classname
     char processType = 'c';
@@ -120,6 +118,7 @@ public class Template {
     try {
       FileWriter file = new FileWriter(classUpper + ".java");
 
+      writeImports(file);
       writeClassHeader(file, classUpper);
       writeVars(file);
       writeConstructor(file, classUpper);
@@ -188,11 +187,21 @@ public class Template {
     return false;
   }
 
-  private static void writeClassHeader(FileWriter file, String className) throws IOException {
+  private static boolean isFromJavaLang(String str) {
+    String import_dir = str.substring(0, str.lastIndexOf('.') + 1);
+    if (import_dir.equals("java.lang.")) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private static void writeImports(FileWriter file) throws IOException {
     // only newline if imported something
     boolean imported = false;
 
     if (classImplements()) {
+      // implementations imports
       for (int i = 0; i<implementations.size(); i++) {
         try {
           String path = getLibPath(implementations.get(i));
@@ -209,6 +218,7 @@ public class Template {
       }
     }
 
+    // extention imports
     if (classExtends()) {
       try {
         String path = getLibPath(extendsName);
@@ -224,11 +234,42 @@ public class Template {
       }
     }
 
+    // variable imports
+    if (variables.size() > 0) {
+      for (int i = 0; i<variables.size(); i += 2) {
+        try {
+          if (isPrimativeStrict(variables.get(i))) {
+            continue;
+          }
+
+          String path = getLibPath(variables.get(i));
+          // no import path needed if its in local dir
+          if (path.equals(variables.get(i))) {
+            continue;
+          }
+
+          // if its from java lang you dont need imports (e.g. String)
+          if (!isFromJavaLang(path)) {
+            file.write("import " + path + ";\n");
+          } else {
+            System.out.println("Import from java lang ignoring.");
+          }
+
+          imported = true;
+        } catch (ClassNotFoundException e) {
+          System.out.println("Could not find `" + variables.get(i) + "` import path, assuming a suitable class will be made or you made a spelling mistake.");
+        }
+      }
+
+    }
+
     // only newline if imported something
     if (imported) {
       file.write("\n");
     }
+  }
 
+  private static void writeClassHeader(FileWriter file, String className) throws IOException {
     file.write("public");
 
     if (abstractClass) {
@@ -321,18 +362,31 @@ public class Template {
     }
   }
 
+  private static boolean isPrimativeStrict(String type) {
+    if (type.equals("int") | type.equals("double") | type.equals("float") | type.equals("long") | type.equals("short")
+    | type.equals("char") | type.equals("boolean") | type.equals("byte")) {
+      return true;
+    }
+
+    return false;
+  }
+
   private static String getDefaultFromTypePrimative(String type) {
     if (type.equals("String")) {
       return "\"\"";
     }
 
-    if (type.equals("int") | type.equals("double") | type.equals("float")) {
+    if (type.equals("int") | type.equals("double") | type.equals("float") | type.equals("long") | type.equals("short")) {
       return "0";
     }
 
     if (type.equals("char")) {
       // since chars cant be empty
       return "'n'";
+    }
+
+    if (type.equals("boolean")) {
+      return "false";
     }
 
     if (type.equals("void")) {
@@ -392,7 +446,6 @@ public class Template {
             }
           }
 
-          System.out.println(preReturn + returnType + " "+ name + "(" + paramOut + ")");
           file.write(preReturn + returnType + " "+ name + "(" + paramOut + ")" + "{\n");
           file.write("\t\treturn " + getDefaultFromTypePrimative(returnType) + ";");
           file.write("\n\t}\n");
