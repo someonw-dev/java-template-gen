@@ -85,7 +85,6 @@ public class Template {
           System.out.println("Error cannot be abstract and have a main function, note that having a make section creates a main function.");
           System.exit(-1);
         }
-
         includeMain = true;
         break;
         case 'a':
@@ -236,7 +235,7 @@ public class Template {
 
     // variable imports
     if (variables.size() > 0) {
-      for (int i = 0; i<variables.size(); i += 2) {
+      for (int i = 0; i<variables.size(); i += 3) {
         try {
           if (isPrimativeStrict(variables.get(i))) {
             continue;
@@ -283,7 +282,7 @@ public class Template {
     }
 
     if (classImplements()) {
-        file.write(" implements ");
+      file.write(" implements ");
       for (int i = 0; i<implementations.size(); i++) {
         file.write(implementations.get(i));
         if (!(i>implementations.size() - 2)) {
@@ -296,8 +295,23 @@ public class Template {
   }
 
   private static void writeVars(FileWriter file) throws IOException {
-    for (int i = 0; i<variables.size(); i += 2) {
-      file.write("\tprivate " + variables.get(i) + " "+ variables.get(i + 1) + ";\n");
+    for (int i = 0; i<variables.size(); i += 3) {
+      String afterPrivate = "";
+      String varParams = variables.get(i + 2);
+      
+      if (varIsStatic(varParams)) {
+        afterPrivate += "static ";
+      }
+
+      if (varIsFinal(varParams)) {
+        afterPrivate += "final ";
+      }
+
+      file.write("\tprivate " + afterPrivate + variables.get(i) + " "+ variables.get(i + 1));
+      if (varIsFinal(varParams)) {
+        file.write(" = " + getDefaultFromTypePrimative(variables.get(i)));
+      }
+      file.write(";\n");
     }
 
     file.write("\n");
@@ -315,12 +329,15 @@ public class Template {
     file.write("\tpublic " + className + "() {\n");
     file.write("\t\tthis(");
 
+    boolean prev = false;
     // +2 since every second entry is a name and not a type
-    for (int i = 0; i<variables.size(); i += 2) {
-      file.write(getDefaultFromTypePrimative(variables.get(i)));
-      // -3 to account for 0 indexing, the fact that the last one should be a variable name and other thing im too lazy
-      if (!(i>variables.size() - 3)) {
-        file.write(", ");
+    for (int i = 0; i<variables.size(); i += 3) {
+      if (varIsDefault(variables.get(i + 2))) {
+        if (prev) {
+          file.write(", ");
+        }
+        file.write(getDefaultFromTypePrimative(variables.get(i)));
+        prev = true;
       }
     }
     file.write(");\n");
@@ -335,20 +352,28 @@ public class Template {
 
     // constructor variables
     file.write("\tpublic " + className + "(");
+    boolean prev = false;
     // practically the same as above
-    for (int i = 0; i<variables.size(); i += 2) {
-      file.write(variables.get(i));
-      file.write(" ");
-      file.write(variables.get(i + 1));
-      if (!(i>variables.size() - 3)) {
-        file.write(", ");
+    for (int i = 0; i<variables.size(); i += 3) {
+      if (varIsDefault(variables.get(i + 2))) {
+        if (prev) {
+          file.write(", ");
+        }
+
+        file.write(variables.get(i));
+        file.write(" ");
+        file.write(variables.get(i + 1));
+
+        prev = true;
       }
     }
     file.write(") {\n");
 
     // +2 since every second entry is a name and not a type
-    for (int i = 0; i<variables.size(); i += 2) {
-      file.write("\t\t" + getMutatorFunctionWithParam(variables.get(i+1), variables.get(i+1)) + ";\n");
+    for (int i = 0; i<variables.size(); i += 3) {
+      if (varIsDefault(variables.get(i + 2))) {
+        file.write("\t\t" + getMutatorFunctionWithParam(variables.get(i+1), variables.get(i+1)) + ";\n");
+      }
     }
 
     file.write("\t}\n");
@@ -480,9 +505,11 @@ public class Template {
   }
 
   private static void writeAccessors(FileWriter file) throws IOException {
-    for (int i = 0; i<variables.size(); i += 2) {
-      file.write("\n");
-      writeAccessor(file, variables.get(i), variables.get(i+1));
+    for (int i = 0; i<variables.size(); i += 3) {
+      if (varIsDefault(variables.get(i + 2))) {
+        file.write("\n");
+        writeAccessor(file, variables.get(i), variables.get(i+1));
+      }
     }
   }
 
@@ -491,9 +518,11 @@ public class Template {
   }
 
   private static void writeMutators(FileWriter file) throws IOException {
-    for (int i = 0; i<variables.size(); i += 2) {
-      file.write("\n");
-      writeMutator(file, variables.get(i), variables.get(i+1));
+    for (int i = 0; i<variables.size(); i += 3) {
+      if (varIsDefault(variables.get(i + 2))) {
+        file.write("\n");
+        writeMutator(file, variables.get(i), variables.get(i+1));
+      }
     }
   }
 
@@ -509,15 +538,44 @@ public class Template {
 
   private static void writeToString(FileWriter file) throws IOException {
     file.write("\n\tpublic String toString() {\n\t\treturn ");
-    for (int i = 0; i<variables.size(); i += 2) {
-      String var = variables.get(i + 1);
-      file.write("\"\\n" + var  + ": \" + " + getAccessorFunction(var));
+    boolean prev = false;
+    for (int i = 0; i<variables.size(); i += 3) {
+      if (varIsDefault(variables.get(i + 2))) {
+        if (prev) {
+          file.write(" + ");
+        }
+        String var = variables.get(i + 1);
+        file.write("\"\\n" + var  + ": \" + " + getAccessorFunction(var));
 
-      if (i<variables.size() - 2) {
-        file.write(" + ");
+        prev = true;
       }
     }
     file.write(";\n\t}\n");
+  }
+
+  // default means there should be getters and setters
+  private static boolean varIsDefault(String params) {
+    if (params.contains("d")) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private static boolean varIsFinal(String params) {
+    if (params.contains("f")) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private static boolean varIsStatic(String params) {
+    if (params.contains("s")) {
+      return true;
+    }
+
+    return false;
   }
 
   private static void updateMake(String cmdName) {
