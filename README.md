@@ -7,7 +7,7 @@ When implementing interfaces and extending abstract classes it will find and ins
 If an extended class has a non default constructor, it will automatically super it with some default values.
 Variables with the `Default` parameter automatically get accessors, mutators, inserted into the non default
 constructor parameters and calls their respective mutators. With the `-m` arg it adds a main file and updates
-your makefile with the given param to run the generated file (the make stuff isnt done yet). 
+your makefile with the given param to run the generated file. 
 
 ## Non-features
 Does not support sub-directories, protected, final, native, strict, synchronized, transient or volatile
