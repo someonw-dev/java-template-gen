@@ -127,6 +127,7 @@ public class Template {
       writeAbstractMethods(file);
       writeMutators(file);
       writeAccessors(file);
+      writeToString(file);
 
       file.write("}");
       file.close();
@@ -451,6 +452,19 @@ public class Template {
 
   private static String capitalize(String value) {
     return value.substring(0, 1).toUpperCase() + value.substring(1);
+  }
+
+  private static void writeToString(FileWriter file) throws IOException {
+    file.write("\n\tpublic String toString() {\n\t\treturn ");
+    for (int i = 0; i<variables.size(); i += 2) {
+      String var = variables.get(i + 1);
+      file.write("\"\\n" + var  + ": \" + " + getAccessorFunction(var));
+
+      if (i<variables.size() - 2) {
+        file.write(" + ");
+      }
+    }
+    file.write(";\n\t}\n");
   }
 
   private static void updateMake(String cmdName) {
