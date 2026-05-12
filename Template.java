@@ -621,7 +621,7 @@ public class Template {
 
   private static void updateMake(String cmdName) {
     // check if makefile exists
-    final String name = "makefile1";
+    final String name = "makefile";
     File checkFile = new File(name);
     FileWriter file;
     boolean exists = true;
