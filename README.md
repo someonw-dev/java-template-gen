@@ -10,7 +10,7 @@ constructor parameters and calls their respective mutators. With the `-m` arg it
 your makefile with the given param to run the generated file. 
 
 ## Non-features
-Does not support sub-directories, protected, final, native, strict, synchronized, transient or volatile
+Does not support sub-directories, protected, native, strict, synchronized, transient or volatile
 
 ## Command & Arguments
 #### Notes:
