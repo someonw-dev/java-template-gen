@@ -49,6 +49,8 @@ different constructors and maybe you want to do something wonky.
 java Template -c Thing -e BaseThing -v String var1 d int var2 d int MAX f Scanner input _ -i Serializable Area -m run
 ```
 
+This generates the `Thing.java` class file.
+
 ##### Variables
 -v int MAX f
 ```
